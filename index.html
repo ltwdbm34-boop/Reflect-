@@ -511,21 +511,25 @@
     }
 
     function transitionTo(nextIdx) {
-      const outEl = wrap.querySelector('.headline.enter');
+      /* Remove ALL existing headlines immediately to prevent stacking */
+      var allEls = wrap.querySelectorAll('.headline');
+      allEls.forEach(function(el) {
+        el.classList.remove('enter');
+        el.classList.add('leave');
+        setTimeout(function() {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, OUT_MS);
+      });
 
-      /* Animate out */
-      if (outEl) {
-        outEl.classList.remove('enter');
-        outEl.classList.add('leave');
-        setTimeout(() => outEl.remove(), ANIM_OUT_MS);
-      }
-
-      /* Animate in */
-      const inEl = makeEl(HEADLINES[nextIdx]);
-      wrap.appendChild(inEl);
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => inEl.classList.add('enter'))
-      );
+      /* Show first headline — short delay so CSS animation is ready */
+    setTimeout(function() {
+      var el = makeEl(HEADLINES[0]);
+      wrap.appendChild(el);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { el.classList.add('enter'); });
+      });
+    }, 100);
+      }, OUT_MS);
 
       current = nextIdx;
       setActiveDot(current);
